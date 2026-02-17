@@ -1,193 +1,50 @@
-# FinWise AI 💰🤖
+# Welcome to your Expo app 👋
 
-A smart financial management application powered by AI. Track your expenses and income, manage your budget, and get intelligent recommendations based on your spending patterns.
+This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
-## Features
+## Get started
 
-### Core Features
-- 📊 **Expense Tracking** - Log daily expenses with categories and tags
-- 💵 **Income Management** - Record income sources and track earnings
-- 🎯 **Budget Planning** - Set and monitor budgets for different categories
-- 📈 **Financial Reports** - Generate detailed reports and visualizations of your finances
-- 📱 **Offline Mode** - Full functionality with SQLite even without internet connection
-- ☁️ **Cloud Sync** - Seamless synchronization between devices via Firebase
+1. Install dependencies
 
-### AI Assistant Features
-- 🤖 **Smart Analysis** - AI analyzes your spending patterns and financial behavior
-- 💡 **Personalized Recommendations** - Get recommendations to improve your financial health
-- 🔍 **Pattern Recognition** - Identifies spending habits that negatively impact your finances
-- 📚 **Financial Learning** - Learn from AI insights about your money management
-- ⚠️ **Anomaly Detection** - Get alerted about unusual spending patterns
-- 🎓 **Financial Tips** - Receive tips based on your specific situation
-
-## Tech Stack
-
-### Frontend
-- **Framework**: React Native with [Expo](https://expo.dev/)
-- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
-- **State Management**: Redux / Zustand (TBD)
-- **Navigation**: React Navigation
-
-### Backend & Database
-- **Offline Database**: SQLite
-- **Cloud Database**: Firebase (Firestore/Realtime Database)
-- **Authentication**: Firebase Authentication
-- **AI Integration**: OpenAI API / Google Gemini API (TBD)
-- **Cloud Functions**: Firebase Cloud Functions (for AI processing)
-
-## Installation
-
-### Prerequisites
-- Node.js (v16 or higher)
-- npm or yarn
-- Expo CLI: `npm install -g expo-cli`
-
-### Setup Steps
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/rendyelang/finwise-ai.git
-   cd finwise-ai
-   ```
-
-2. **Install dependencies**
    ```bash
    npm install
-   # or
-   yarn install
    ```
 
-3. **Create environment file**
+2. Start the app
+
    ```bash
-   cp .env.example .env.local
+   npx expo start
    ```
 
-4. **Configure Firebase**
-   - Create a Firebase project at [firebase.google.com](https://firebase.google.com)
-   - Add your Firebase config to `.env.local`:
-   ```
-   EXPO_PUBLIC_FIREBASE_API_KEY=your_api_key
-   EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=your_auth_domain
-   EXPO_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
-   EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET=your_storage_bucket
-   EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-   EXPO_PUBLIC_FIREBASE_APP_ID=your_app_id
-   ```
+In the output, you'll find options to open the app in a
 
-5. **Configure AI API**
-   - Get your API key from OpenAI or Google Gemini
-   - Add to `.env.local`:
-   ```
-   EXPO_PUBLIC_AI_API_KEY=your_ai_api_key
-   EXPO_PUBLIC_AI_PROVIDER=openai  # or gemini
-   ```
+- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
+- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
+- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
+- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
 
-## Running the App
+You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
 
-### Development Mode
+## Get a fresh project
+
+When you're ready, run:
+
 ```bash
-npm start
-# or
-yarn start
+npm run reset-project
 ```
 
-Then:
-- Press `i` to run on iOS simulator
-- Press `a` to run on Android emulator
-- Press `w` to run on web
-- Scan QR code with Expo Go app for physical device testing
+This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
 
-### Production Build
-```bash
-# iOS
-eas build --platform ios
+## Learn more
 
-# Android
-eas build --platform android
+To learn more about developing your project with Expo, look at the following resources:
 
-# Web
-npm run build:web
-```
+- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
+- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
 
-## Project Structure
+## Join the community
 
-```
-finwise-ai/
-├── app/                      # App screens & navigation
-├── components/               # Reusable components
-├── services/
-│   ├── firebase/            # Firebase configuration & services
-│   ├── sqlite/              # SQLite database operations
-│   └── ai/                  # AI assistant integration
-├── store/                   # State management
-├── utils/                   # Utility functions
-├── types/                   # TypeScript type definitions
-├── assets/                  # Images, fonts, etc
-├── .env.example             # Environment variables template
-├── tailwind.config.js       # Tailwind configuration
-├── app.json                 # Expo configuration
-└── package.json
-```
+Join our community of developers creating universal apps.
 
-## Environment Variables
-
-See `.env.example` for all required environment variables. Never commit `.env` file with sensitive data!
-
-## Features Roadmap
-
-- [ ] Core CRUD operations (Expenses, Income, Budget)
-- [ ] SQLite offline synchronization
-- [ ] Firebase cloud synchronization
-- [ ] AI pattern analysis
-- [ ] Financial recommendations
-- [ ] Advanced reporting & charts
-- [ ] Budget alerts & notifications
-- [ ] Multi-currency support
-- [ ] Data export (CSV, PDF)
-- [ ] Dark mode support
-
-## Future Backend Migration
-
-When the app scales, we'll separate the backend to:
-- Handle complex AI/ML processing
-- Improve security for sensitive operations
-- Enable better scalability
-- Support multiple clients (web, mobile, etc)
-
-Current stack (Firebase) is perfect for MVP and early scaling.
-
-## Database Strategy
-
-### SQLite (Offline)
-- Local data storage
-- Instant access without internet
-- Perfect for daily logging
-
-### Firebase (Online)
-- Cloud backup
-- Real-time synchronization
-- Multi-device support
-- Authentication
-
-Data automatically syncs when connection is available.
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Author
-
-**Rendy Elang**
-- GitHub: [@rendyelang](https://github.com/rendyelang)
-
----
-
-Made with ❤️ by Rendy Elang
+- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
+- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
