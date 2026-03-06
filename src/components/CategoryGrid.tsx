@@ -3,13 +3,16 @@ import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Category } from "../database/sqlite";
 
+const ACTIVE_COLOR = "#1c64f2";
+
 interface CategoryGridProps {
   categories: Category[];
   selectedCategory: number | null;
   onSelectCategory: (id: number) => void;
+  onCustomPress?: () => void;
 }
 
-export default function CategoryGrid({ categories, selectedCategory, onSelectCategory }: CategoryGridProps) {
+export default function CategoryGrid({ categories, selectedCategory, onSelectCategory, onCustomPress }: CategoryGridProps) {
   if (!categories || categories.length === 0) {
     return (
       <View style={styles.emptyContainer}>
@@ -23,14 +26,22 @@ export default function CategoryGrid({ categories, selectedCategory, onSelectCat
       {categories.map((cat) => {
         const isSelected = selectedCategory === cat.id;
         return (
-          <TouchableOpacity key={cat.id} style={styles.categoryItem} onPress={() => onSelectCategory(cat.id)} activeOpacity={0.7}>
-            <View style={styles.categoryIconWrap}>
-              <Ionicons name={cat.icon as any} size={28} color={isSelected ? cat.color : "#737373"} />
-            </View>
-            <Text style={[styles.categoryName, isSelected && { color: cat.color, fontWeight: "600" }]}>{cat.name}</Text>
+          <TouchableOpacity key={cat.id} style={[styles.categoryItem, isSelected && styles.categoryItemActive]} onPress={() => onSelectCategory(cat.id)} activeOpacity={0.7}>
+            <Ionicons name={cat.icon as any} size={24} color={isSelected ? ACTIVE_COLOR : "#737373"} />
+            <Text style={[styles.categoryName, isSelected && styles.categoryNameActive]} numberOfLines={1}>
+              {cat.name}
+            </Text>
           </TouchableOpacity>
         );
       })}
+
+      {/* Custom category button */}
+      {onCustomPress && (
+        <TouchableOpacity style={styles.categoryItem} onPress={onCustomPress} activeOpacity={0.7}>
+          <Ionicons name="add-circle-outline" size={24} color="#737373" />
+          <Text style={styles.categoryName}>Custom</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
@@ -39,20 +50,32 @@ const styles = StyleSheet.create({
   categoriesGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    paddingVertical: 10,
+    paddingVertical: 4,
   },
   categoryItem: {
-    width: "25%",
+    width: "23%",
     alignItems: "center",
-    marginBottom: 20,
+    justifyContent: "center",
+    marginBottom: 10,
+    marginHorizontal: "1%",
+    paddingVertical: 10,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: "transparent",
   },
-  categoryIconWrap: {
-    marginBottom: 6,
+  categoryItemActive: {
+    borderColor: ACTIVE_COLOR,
+    backgroundColor: "#eff6ff",
   },
   categoryName: {
-    fontSize: 12,
+    fontSize: 11,
     color: "#525252",
     textAlign: "center",
+    marginTop: 6,
+  },
+  categoryNameActive: {
+    color: ACTIVE_COLOR,
+    fontWeight: "600",
   },
   emptyContainer: {
     paddingVertical: 20,

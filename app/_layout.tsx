@@ -1,15 +1,16 @@
 import { Stack, useRouter, useSegments } from "expo-router";
 import { onAuthStateChanged } from "firebase/auth";
 import { useEffect, useState } from "react";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "../global.css";
 import { initDB } from "../src/database/sqlite";
 import { useAuthStore } from "../src/store/useAuthStore";
 import { auth } from "../src/utils/firebase";
 
-export default function RootLayout() {
+function RootLayoutNav() {
   const { user, isLoading: authLoading, setUser, setLoading } = useAuthStore();
   const [dbInitialized, setDbInitialized] = useState(false);
-  const segments = useSegments(); // Untuk tau kita lagi di URL mana
+  const segments = useSegments();
   const router = useRouter();
 
   // 1. Inisialisasi Database SQLite
@@ -23,27 +24,24 @@ export default function RootLayout() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
-      setLoading(false); // Satpam selesai ngecek
+      setLoading(false);
     });
     return unsubscribe;
   }, [setUser, setLoading]);
 
-  // 3. Logika Penjaga Gerbang (Tendang atau Persilakan Masuk)
+  // 3. Logika Penjaga Gerbang
   useEffect(() => {
-    if (authLoading || !dbInitialized) return; // Kalau masih ngecek, diem dulu
+    if (authLoading || !dbInitialized) return;
 
     const inAuthGroup = segments[0] === "(auth)";
 
     if (!user && !inAuthGroup) {
-      // Belum login tapi nyoba masuk ke area privat? Tendang ke login!
       router.replace("/(auth)/login");
     } else if (user && inAuthGroup) {
-      // Udah login tapi iseng buka halaman login lagi? Suruh masuk ke Home!
       router.replace("/(tabs)");
     }
   }, [user, authLoading, dbInitialized, segments, router]);
 
-  // Bisa diganti pakai UI Loading Screen yang keren nanti
   if (authLoading || !dbInitialized) return null;
 
   return (
@@ -54,5 +52,13 @@ export default function RootLayout() {
       <Stack.Screen name="categories" options={{ presentation: "modal", headerShown: false }} />
       <Stack.Screen name="create-budget" options={{ presentation: "modal", headerShown: false }} />
     </Stack>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <RootLayoutNav />
+    </GestureHandlerRootView>
   );
 }
