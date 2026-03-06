@@ -96,10 +96,12 @@ const seedDefaultCategories = async () => {
     { name: "Entertainment", icon: "game-controller-outline", color: "#8b5cf6", type: "expense", isDefault: 1 },
     { name: "Housing", icon: "home-outline", color: "#10b981", type: "expense", isDefault: 1 },
     { name: "Bills", icon: "receipt-outline", color: "#6366f1", type: "expense", isDefault: 1 },
+    { name: "Others", icon: "ellipsis-horizontal-circle-outline", color: "#6b7280", type: "expense", isDefault: 1 },
     // Income
     { name: "Salary", icon: "cash-outline", color: "#10b981", type: "income", isDefault: 1 },
     { name: "Freelance", icon: "laptop-outline", color: "#6366f1", type: "income", isDefault: 1 },
     { name: "Investments", icon: "trending-up-outline", color: "#14b8a6", type: "income", isDefault: 1 },
+    { name: "Others", icon: "ellipsis-horizontal-circle-outline", color: "#6b7280", type: "income", isDefault: 1 },
   ];
 
   for (const cat of defaultCats) {
@@ -114,7 +116,7 @@ export const getCategories = async (type?: "income" | "expense"): Promise<Catego
   if (!db) return [];
   try {
     if (type) {
-      return await db.getAllAsync("SELECT * FROM Categories WHERE type = ? ORDER BY id ASC", type);
+      return await db.getAllAsync("SELECT * FROM Categories WHERE type = ? ORDER BY id ASC", [type]);
     }
     return await db.getAllAsync("SELECT * FROM Categories ORDER BY type, id ASC");
   } catch (error) {
@@ -125,7 +127,7 @@ export const getCategories = async (type?: "income" | "expense"): Promise<Catego
 
 export const addCategory = async (name: string, icon: string, color: string, type: "income" | "expense") => {
   if (!db) return null;
-  const result = await db.runAsync("INSERT INTO Categories (name, icon, color, type, isDefault) VALUES (?, ?, ?, ?, 0)", name, icon, color, type);
+  const result = await db.runAsync("INSERT INTO Categories (name, icon, color, type, isDefault) VALUES (?, ?, ?, ?, 0)", [name, icon, color, type]);
   return result.lastInsertRowId;
 };
 
@@ -133,7 +135,7 @@ export const deleteCategory = async (id: number) => {
   if (!db) return false;
 
   // Prevent deleting default categories
-  const cat: any = await db.getFirstAsync("SELECT isDefault FROM Categories WHERE id = ?", id);
+  const cat: any = await db.getFirstAsync("SELECT isDefault FROM Categories WHERE id = ?", [id]);
   if (cat?.isDefault === 1) {
     throw new Error("Cannot delete default categories");
   }
@@ -155,13 +157,11 @@ export const getTransactions = async (limit: number = 50): Promise<Transaction[]
   if (!db) return [];
   try {
     return await db.getAllAsync(
-      `
-      SELECT t.*, c.name as categoryName, c.icon as categoryIcon, c.color as categoryColor 
-      FROM Transactions t
-      JOIN Categories c ON t.categoryId = c.id
-      ORDER BY date DESC
-      LIMIT ?
-    `,
+      `SELECT t.*, c.name as categoryName, c.icon as categoryIcon, c.color as categoryColor 
+       FROM Transactions t
+       JOIN Categories c ON t.categoryId = c.id
+       ORDER BY date DESC
+       LIMIT ?`,
       limit,
     );
   } catch (error) {
@@ -182,6 +182,28 @@ export const deleteTransaction = async (id: number) => {
   return true;
 };
 
+export const getTransactionById = async (id: number): Promise<Transaction | null> => {
+  if (!db) return null;
+  try {
+    return await db.getFirstAsync(
+      `SELECT t.*, c.name as categoryName, c.icon as categoryIcon, c.color as categoryColor 
+       FROM Transactions t
+       JOIN Categories c ON t.categoryId = c.id
+       WHERE t.id = ?`,
+      id,
+    );
+  } catch (error) {
+    console.error("Error fetching transaction by id:", error);
+    return null;
+  }
+};
+
+export const updateTransaction = async (id: number, amount: number, categoryId: number, title: string, date: string, type: "income" | "expense", notes?: string) => {
+  if (!db) return false;
+  await db.runAsync("UPDATE Transactions SET amount = ?, categoryId = ?, title = ?, date = ?, type = ?, notes = ? WHERE id = ?", amount, categoryId, title, date, type, notes || null, id);
+  return true;
+};
+
 export const getBalanceSummary = async () => {
   if (!db) return { totalIncome: 0, totalExpense: 0, balance: 0 };
 
@@ -199,6 +221,41 @@ export const getBalanceSummary = async () => {
     };
   } catch (error) {
     console.error("Error calculating balance summary:", error);
+    return { totalIncome: 0, totalExpense: 0, balance: 0 };
+  }
+};
+
+export const getTransactionsByDateRange = async (startDate: string, endDate: string): Promise<Transaction[]> => {
+  if (!db) return [];
+  try {
+    return await db.getAllAsync(
+      `SELECT t.*, c.name as categoryName, c.icon as categoryIcon, c.color as categoryColor 
+       FROM Transactions t
+       JOIN Categories c ON t.categoryId = c.id
+       WHERE t.date >= ? AND t.date <= ?
+       ORDER BY t.date DESC`,
+      startDate,
+      endDate,
+    );
+  } catch (error) {
+    console.error("Error fetching transactions by date range:", error);
+    return [];
+  }
+};
+
+export const getBalanceSummaryByDateRange = async (startDate: string, endDate: string) => {
+  if (!db) return { totalIncome: 0, totalExpense: 0, balance: 0 };
+
+  try {
+    const income: any = await db.getFirstAsync("SELECT SUM(amount) as total FROM Transactions WHERE type = 'income' AND date >= ? AND date <= ?", startDate, endDate);
+    const expense: any = await db.getFirstAsync("SELECT SUM(amount) as total FROM Transactions WHERE type = 'expense' AND date >= ? AND date <= ?", startDate, endDate);
+
+    const totalIncome = income?.total || 0;
+    const totalExpense = expense?.total || 0;
+
+    return { totalIncome, totalExpense, balance: totalIncome - totalExpense };
+  } catch (error) {
+    console.error("Error calculating balance summary by range:", error);
     return { totalIncome: 0, totalExpense: 0, balance: 0 };
   }
 };
