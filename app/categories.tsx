@@ -1,10 +1,11 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { Alert, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import ConfirmModal from "../src/components/ConfirmModal";
 import { Category, addCategory, deleteCategory, getCategories } from "../src/database/sqlite";
 
-const COLORS = ["#f59e0b", "#3b82f6", "#ec4899", "#8b5cf6", "#10b981", "#6366f1", "#14b8a6", "#ef4444", "#f97316"];
+const DEFAULT_COLOR = "#1c64f2";
 const ICONS = ["cash-outline", "cart-outline", "restaurant-outline", "car-outline", "home-outline", "game-controller-outline", "laptop-outline", "heart-outline", "gift-outline", "airplane-outline", "bus-outline"];
 
 export default function CategoriesScreen() {
@@ -16,7 +17,10 @@ export default function CategoriesScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [newName, setNewName] = useState("");
   const [newIcon, setNewIcon] = useState(ICONS[0]);
-  const [newColor, setNewColor] = useState(COLORS[0]);
+
+  // Confirm Modal States
+  const [deleteCategoryId, setDeleteCategoryId] = useState<number | null>(null);
+  const [errorModal, setErrorModal] = useState<{ title: string; message: string } | null>(null);
 
   useEffect(() => {
     loadCategories();
@@ -33,35 +37,33 @@ export default function CategoriesScreen() {
 
   const handleAddCategory = async () => {
     if (!newName.trim()) {
-      Alert.alert("Error", "Please enter a category name");
+      setErrorModal({ title: "Invalid Input", message: "Please enter a category name" });
       return;
     }
     try {
-      await addCategory(newName, newIcon, newColor, activeTab);
+      await addCategory(newName, newIcon, DEFAULT_COLOR, activeTab);
       setModalVisible(false);
       setNewName("");
       loadCategories();
     } catch (error) {
-      Alert.alert("Error", "Failed to add category");
+      setErrorModal({ title: "Error", message: "Failed to add category" });
     }
   };
 
-  const handleDeleteCategory = async (id: number) => {
-    Alert.alert("Delete Category", "Are you sure you want to delete this category?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Delete",
-        style: "destructive",
-        onPress: async () => {
-          try {
-            await deleteCategory(id);
-            loadCategories();
-          } catch (error: any) {
-            Alert.alert("Error", error.message || "Failed to delete category");
-          }
-        },
-      },
-    ]);
+  const executeDeleteCategory = async () => {
+    if (deleteCategoryId === null) return;
+    try {
+      await deleteCategory(deleteCategoryId);
+      loadCategories();
+      setDeleteCategoryId(null);
+    } catch (error: any) {
+      setDeleteCategoryId(null);
+      setErrorModal({ title: "Error", message: error.message || "Failed to delete category" });
+    }
+  };
+
+  const handleDeleteCategory = (id: number) => {
+    setDeleteCategoryId(id);
   };
 
   return (
@@ -96,9 +98,9 @@ export default function CategoriesScreen() {
             </View>
             <View style={styles.catInfo}>
               <Text style={styles.catName}>{cat.name}</Text>
-              {cat.isDefault === 1 && <Text style={styles.defaultBadge}>Default</Text>}
+              {Number(cat.isDefault) === 1 && <Text style={styles.defaultBadge}>Default</Text>}
             </View>
-            {cat.isDefault === 0 && (
+            {Number(cat.isDefault) === 0 && (
               <TouchableOpacity onPress={() => handleDeleteCategory(cat.id)} style={styles.deleteBtn}>
                 <Ionicons name="trash-outline" size={20} color="#ef4444" />
               </TouchableOpacity>
@@ -120,18 +122,11 @@ export default function CategoriesScreen() {
 
             <TextInput style={styles.input} placeholder="Category Name" value={newName} onChangeText={setNewName} placeholderTextColor="#9ca3af" />
 
-            <Text style={styles.label}>Select Color</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.colorScroll}>
-              {COLORS.map((c) => (
-                <TouchableOpacity key={c} style={[styles.colorCircle, { backgroundColor: c }, newColor === c && styles.colorSelected]} onPress={() => setNewColor(c)} />
-              ))}
-            </ScrollView>
-
             <Text style={styles.label}>Select Icon</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.colorScroll}>
               {ICONS.map((i) => (
-                <TouchableOpacity key={i} style={[styles.iconCircle, newIcon === i && { backgroundColor: newColor + "20", borderColor: newColor }]} onPress={() => setNewIcon(i)}>
-                  <Ionicons name={i as any} size={24} color={newIcon === i ? newColor : "#6b7280"} />
+                <TouchableOpacity key={i} style={[styles.iconCircle, newIcon === i && { backgroundColor: DEFAULT_COLOR + "20", borderColor: DEFAULT_COLOR }]} onPress={() => setNewIcon(i)}>
+                  <Ionicons name={i as any} size={24} color={newIcon === i ? DEFAULT_COLOR : "#6b7280"} />
                 </TouchableOpacity>
               ))}
             </ScrollView>
@@ -142,6 +137,26 @@ export default function CategoriesScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* Confirm Modals */}
+      <ConfirmModal
+        visible={deleteCategoryId !== null}
+        title="Delete Category"
+        message="Are you sure you want to delete this category?"
+        confirmText="Delete"
+        isDestructive={true}
+        onConfirm={executeDeleteCategory}
+        onCancel={() => setDeleteCategoryId(null)}
+      />
+
+      <ConfirmModal
+        visible={errorModal !== null}
+        title={errorModal?.title || "Error"}
+        message={errorModal?.message || "An unexpected error occurred."}
+        confirmText="OK"
+        onConfirm={() => setErrorModal(null)}
+        onCancel={() => setErrorModal(null)}
+      />
     </View>
   );
 }
