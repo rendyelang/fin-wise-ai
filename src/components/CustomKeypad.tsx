@@ -82,8 +82,8 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderColor: "#e5e5e5",
     paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 30,
+    paddingTop: 12,
+    paddingBottom: 24,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: -4 },
     shadowOpacity: 0.05,
@@ -93,11 +93,11 @@ const styles = StyleSheet.create({
   keypadRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 12,
+    marginBottom: 8,
   },
   keypadBtn: {
     width: "23%",
-    height: 50,
+    height: 44,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -112,9 +112,9 @@ const styles = StyleSheet.create({
   saveSubmitBtn: {
     backgroundColor: "#1c64f2",
     borderRadius: 12,
-    paddingVertical: 16,
+    paddingVertical: 14,
     alignItems: "center",
-    marginTop: 10,
+    marginTop: 6,
   },
   saveSubmitTxt: {
     color: "#ffffff",
